@@ -1,0 +1,4 @@
+.rectangle{
+    /*-fx-background-image: "images/block.png";*/
+    -fx-background-color: red;
+}
