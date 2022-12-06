@@ -8,6 +8,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -44,7 +45,6 @@ public class Server extends Thread {
         public Tank(InputStream inputStream, OutputStream outputStream) {
             this.inputStream = inputStream;
             this.outputStream = outputStream;
-//            this.inputThread = new TankInputThread(this);
         }
 
         @NoArgsConstructor
@@ -115,11 +115,7 @@ public class Server extends Thread {
                                 break;
                         }
 
-//                        for (Sprite sprite : allObjects) {
-//                            if (sprite.getNickName() != null && sprite.getNickName().equals(name)) {
-//                                leaveGame = sprite.dead;
-//                            }
-//                        }
+
                         if (leaveGame) {
                             player.run();
                             break;
@@ -135,11 +131,30 @@ public class Server extends Thread {
 
         public void run() {
             try {
-                System.out.println("ЖДЕМ НИКА ИГРОКА");
                 byte[] dataFromUser = readInput(inputStream);
+                if(dataFromUser.length==0){
+                    inputStream.close();
+                    outputStream.close();
+                    return;
+                }
                 MainPacket packetFromUser = MainPacket.parse(dataFromUser);
                 if (packetFromUser.getType() == 1) {
                     name = packetFromUser.getValue(String.class);
+                    for(Sprite sprite:allObjects){
+                        if(sprite.getNickName()!=null && sprite.getNickName().equals(name)){
+                            LinkedList<Integer> XAndY = new LinkedList<>();
+                            XAndY.add(0);
+                            XAndY.add(0);
+                            MainPacket startCoordinate=MainPacket.create(2);
+                            startCoordinate.setValue(XAndY);
+                            outputStream.write(startCoordinate.toByteArray());
+                            outputStream.flush();
+                            outputStream.write(MainPacket.create(4).toByteArray());
+                            outputStream.flush();
+                            run();
+                            return;
+                        }
+                    }
                     while (true) {
                         boolean occupied = false;
                         for (Sprite sprite : allObjects) {
@@ -210,7 +225,6 @@ public class Server extends Thread {
                             break;
                         }
                     }
-//                        allObjects.add(new Sprite(0, 0, 30, 30, "player", Color.BLUE, Direction.UP, clientSocket.getInputStream(), clientSocket.getOutputStream(), name));
                 } else {
                     System.out.println(packetFromUser.getType());
                     this.run();

@@ -134,7 +134,6 @@ public class Main extends Application {
             if (sprite.type.equals("player")) {
                 if (sprite.dead) {
                     try {
-                        System.out.println("УБИЛИ!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
                         sprite.outputStream.write(MainPacket.create(4).toByteArray());
                         sprite.outputStream.flush();
                     } catch (IOException e) {
@@ -182,7 +181,6 @@ public class Main extends Application {
 
         }
 
-        System.out.println(streams.toString());
 //        System.out.println(allObjects.toString());
 
 
