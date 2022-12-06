@@ -28,14 +28,15 @@ public class Client extends Thread{
     int x=-1;
     int y=-1;
 
-    InputStream inputStream;
-    OutputStream outputStream;
+    public InputStream inputStream;
+    public OutputStream outputStream;
 
     List<List<Object>> players;
 
     String name;
 
     public boolean gameIsFinished=false;
+    public boolean leaveApp=false;
 
     List<Sprite> otherPlayerAndBullets=new LinkedList<>();
 
@@ -109,8 +110,6 @@ public class Client extends Thread{
                 startCoordinate= MainPacket.parse(StartCoordinateData);
                 type=(int)startCoordinate.getType();
             }
-//            byte[] StartCoordinateData=readInput(inputStream);
-//            MainPacket startCoordinate= MainPacket.parse(StartCoordinateData);
             LinkedList<Integer> startXandY=startCoordinate.getValue(LinkedList.class);
             x=startXandY.get(0);
             y=startXandY.get(1);
@@ -118,6 +117,7 @@ public class Client extends Thread{
                 byte[] ServerData=readInput(inputStream);
                 MainPacket packet= MainPacket.parse(ServerData);
                 if(packet.getType()==4 || gameIsFinished){
+                    x=0;
                     gameIsFinished=true;
                     MainPacket packetFromClientToServer = MainPacket.create(4);
                     try {
@@ -158,15 +158,11 @@ public class Client extends Thread{
                     }
                 }
                 otherPlayerAndBullets=otherObjects;
-                /**
-                 * ЗДЕСЬ МЫ ВСЕГДА БУДЕМ ОТ СЕРВЕРА ПОЛУЧАТЬ ПАКЕТ 5 ТИПА, НАДО НАЧАТЬ РАБОТАТЬ С JAVA FX
-                 * ЧТОБЫ ПОНЯТЬ КАК ОТОБРАЖАТЬ НА ПОЛЕ ПОЛУЧЕННЫЕ КООРДИНАТЫ И НИКИ ИГРОКОВ(ВСЕ ЭТО ХРАНИТ Players)
-                 */
 
 
             }
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            System.out.println("Игра завершена!");
         }
     }
 

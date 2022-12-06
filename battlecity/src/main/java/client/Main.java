@@ -15,10 +15,6 @@ public class Main extends Application {
 
     public static void main(String[] args) {
         client=Client.create("localhost",4444);
-//        while(true){
-//            client.start();
-//            launch(args);
-//        }
         client.start();
         launch(args);
 
