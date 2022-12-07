@@ -8,7 +8,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -151,6 +150,12 @@ public class Server extends Thread {
                             outputStream.flush();
                             outputStream.write(MainPacket.create(4).toByteArray());
                             outputStream.flush();
+                            dataFromUser = readInput(inputStream);
+                            packetFromUser = MainPacket.parse(dataFromUser);
+                            if(packetFromUser.getType()==4){
+                            }else{
+                                throw new RuntimeException("Здесь по какой то причине не 4 пакет, иди перепроверять ");
+                            }
                             run();
                             return;
                         }
@@ -230,6 +235,7 @@ public class Server extends Thread {
                     this.run();
 //                    throw new RuntimeException("Походу до нас сейчас дошли старые пакеты");
                 }
+                System.out.println("Мы отреспавнили игрока");
 
 
                 inputThread = new TankInputThread(this);
