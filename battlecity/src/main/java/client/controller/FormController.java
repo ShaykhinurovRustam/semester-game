@@ -33,6 +33,7 @@ import java.util.ResourceBundle;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 
+
 @Data
 public class FormController implements Initializable {
 
@@ -73,18 +74,29 @@ public class FormController implements Initializable {
 
     private void update() {
         t += 0.016;
-//        System.out.println("ОБНОВЛЕНИЕ!");
 
         if(Main.client.isGameIsFinished()){
             try {
+                Main.client.gameIsFinished=false;
                 timer.stop();
                 Parent root = FXMLLoader.load(Objects.requireNonNull(getClass().getResource("/form.fxml")));
                 Scene scene = new Scene(root);
                 stage.setScene(scene);
                 stage.show();
-                Main.client.gameIsFinished=false;
+                scene.setOnKeyPressed(e->{
+                    switch (e.getCode()){
+                        case ESCAPE:
+                            Main.client.leaveApp=true;
+                            try {
+                                Main.client.inputStream.close();
+                                Main.client.outputStream.close();
+                            } catch (IOException ex) {
+                                throw new RuntimeException(ex);
+                            }
+                            stage.close();
+                    }
+                });
                 return;
-//            stage.close();
             }catch (Exception e){
                 throw new RuntimeException(e);
             }
@@ -173,6 +185,7 @@ public class FormController implements Initializable {
     public void login(ActionEvent event) throws IOException {
 
 
+        System.out.println("пытаемся войти");
 
         stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
 
@@ -181,6 +194,7 @@ public class FormController implements Initializable {
 //        player.setNickName(nameTextField.getText());
 
         //ОТПРАВЛЯЕМ СЕРВЕРУ НАШ НИК
+        System.out.println("ОТПРАВЛЯЕМ СЕРВЕРУ НАШ НИК");
         packetFromClientToServer = MainPacket.create(1);
         packetFromClientToServer.setValue(userName.getText());
         try {
@@ -191,13 +205,13 @@ public class FormController implements Initializable {
         }
 
         while (true){
-//            System.out.println(Main.client.getX());
+//            System.out.println("застреваем тууут");
             System.out.println();
             if(Main.client.getX()!=-1){
-
                 break;
             }
         }
+        System.out.println("нет, не тут");
 
         player = new Sprite(Main.client.getX(), Main.client.getY(), 30, 30, "player", Color.BLUE, null,null,null,null);
         player.setNickName(nameTextField.getText());
@@ -457,13 +471,6 @@ public class FormController implements Initializable {
                     break;
                 case ESCAPE:
                     Main.client.gameIsFinished=true;
-//                    packetFromClientToServer = MainPacket.create(4);
-//                    try {
-//                        outputStream.write(packetFromClientToServer.toByteArray());
-//                        outputStream.flush();
-//                    } catch (IOException ex) {
-//                        throw new RuntimeException(ex);
-//                    }
                     stage.close();
             }
         });
