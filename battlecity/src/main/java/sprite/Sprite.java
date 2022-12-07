@@ -13,13 +13,13 @@ public class Sprite extends Rectangle {
 
     public static int globalId=0;
 
-    public int id;
     public boolean dead = false;
     public final String type;
     public Main.Direction direction = null;
     public InputStream inputStream;
     public OutputStream outputStream;
     String nickName;
+
 
 
     public Main.Direction getDirection(){
@@ -32,7 +32,6 @@ public class Sprite extends Rectangle {
 
     public Sprite(int x, int y, int w, int h, String type, Color color, Main.Direction direction,InputStream inputStream,OutputStream outputStream,String nickName) {
         super(w, h, color);
-        this.id=globalId++;
         this.inputStream=inputStream;
         this.outputStream=outputStream;
         this.nickName=nickName;
@@ -81,12 +80,12 @@ public class Sprite extends Rectangle {
         }
 
 
-
-
         this.type = type;
         setTranslateX(x);
         setTranslateY(y);
     }
+
+
     public void moveLeft() {
         if (getTranslateX() - 5 > -4) {
             setTranslateX(getTranslateX() - 5);
@@ -123,7 +122,6 @@ public class Sprite extends Rectangle {
     @Override
     public String toString() {
         return "Sprite{" +
-                "id=" + id +
                 ", X=" + getTranslateX() +
                 ", Y=" + getTranslateY() +
                 ", dead=" + dead +
