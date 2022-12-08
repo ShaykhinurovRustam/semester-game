@@ -12,13 +12,14 @@ import java.util.LinkedList;
 import java.util.List;
 
 import javafx.scene.paint.Color;
-import server.Main.Direction;
+import server.Direction;
 import sprite.Sprite;
 
 @NoArgsConstructor
 public class Server extends Thread {
 
     List<Sprite> allObjects = new LinkedList<>();
+    List<String> allNickNames=new LinkedList<>();
 
     ServerSocket serverSocket;
     Socket clientSocket;
@@ -132,35 +133,44 @@ public class Server extends Thread {
             try {
                 byte[] dataFromUser = readInput(inputStream);
                 if(dataFromUser.length==0){
+                    for(int i=0;i<allNickNames.size();i++){
+                        if(allNickNames.get(i).equals(name)){
+                            allNickNames.remove(i);
+                            break;
+                        }
+                    }
                     inputStream.close();
                     outputStream.close();
                     return;
                 }
                 MainPacket packetFromUser = MainPacket.parse(dataFromUser);
                 if (packetFromUser.getType() == 1) {
-                    name = packetFromUser.getValue(String.class);
-                    for(Sprite sprite:allObjects){
-                        if(sprite.getNickName()!=null && sprite.getNickName().equals(name)){
-                            LinkedList<Integer> XAndY = new LinkedList<>();
-                            XAndY.add(0);
-                            XAndY.add(0);
-                            MainPacket startCoordinate=MainPacket.create(2);
-                            startCoordinate.setValue(XAndY);
-                            outputStream.write(startCoordinate.toByteArray());
-                            outputStream.flush();
-                            outputStream.write(MainPacket.create(4).toByteArray());
-                            outputStream.flush();
-                            dataFromUser = readInput(inputStream);
-                            packetFromUser = MainPacket.parse(dataFromUser);
-                            if(packetFromUser.getType()==4){
-                            }else{
-                                throw new RuntimeException("Здесь по какой то причине не 4 пакет, иди перепроверять ");
+                    if(name==null){
+                        name = packetFromUser.getValue(String.class);
+                        System.out.println(allNickNames.toString());
+                        for(String nick: allNickNames){
+                            if(nick.equals(name)){
+                                name=null;
+                                LinkedList<Integer> XAndY = new LinkedList<>();
+                                XAndY.add(-2);
+                                XAndY.add(-2);
+                                MainPacket startCoordinate=MainPacket.create(2);
+                                startCoordinate.setValue(XAndY);
+                                outputStream.write(startCoordinate.toByteArray());
+                                outputStream.flush();
+                                outputStream.write(MainPacket.create(4).toByteArray());
+                                outputStream.flush();
+                                dataFromUser = readInput(inputStream);
+                                packetFromUser = MainPacket.parse(dataFromUser);
+                                run();
+                                return;
                             }
-                            run();
-                            return;
                         }
+                        allNickNames.add(name);
                     }
+                    System.out.println(allNickNames.toString());
                     while (true) {
+                        System.out.println("Определяем позицию");
                         boolean occupied = false;
                         for (Sprite sprite : allObjects) {
                             if (sprite.getTranslateX() < 90 && sprite.getTranslateY() < 90) {
@@ -233,9 +243,7 @@ public class Server extends Thread {
                 } else {
                     System.out.println(packetFromUser.getType());
                     this.run();
-//                    throw new RuntimeException("Походу до нас сейчас дошли старые пакеты");
                 }
-                System.out.println("Мы отреспавнили игрока");
 
 
                 inputThread = new TankInputThread(this);

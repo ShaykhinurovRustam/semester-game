@@ -99,7 +99,7 @@ public class Main extends Application {
 
         List<Sprite> allObjects = server.getAllObjects();
 
-        System.out.println(allObjects.toString());
+//        System.out.println(allObjects.toString());
 
 
         sprites(allObjects).forEach(s -> {
@@ -131,6 +131,13 @@ public class Main extends Application {
 //                            System.out.println("Пуля ударилась об игрока");
                             s.dead = true;
                             player.dead = true;
+                            String nameOfShot=s.getNickName();
+                            String nameOfKiller=nameOfShot.substring(0,nameOfShot.length()-6);
+                            for(Sprite sprite:allObjects){
+                                if(sprite.getNickName().equals(nameOfKiller)){
+                                    sprite.setKillingCount(sprite.getKillingCount()+1);
+                                }
+                            }
                         }
                     });
 
@@ -173,6 +180,7 @@ public class Main extends Application {
                     playerInfo.add((byte)2);
                     break;
             }
+            playerInfo.add(sprite.getKillingCount());
             players.add(playerInfo);
 
         }
@@ -183,7 +191,7 @@ public class Main extends Application {
         for (Sprite sprite : allObjects) {
             if (sprite.type.equals("player")) {
                 try {
-                    streams.add(sprite.outputStream.toString());
+                    streams.add(sprite.outputStream.toString());//это вроде и не нужно уже
                     sprite.outputStream.write(packet.toByteArray());
                     sprite.outputStream.flush();
                 } catch (IOException e) {
@@ -317,7 +325,7 @@ public class Main extends Application {
         stage.minHeightProperty().bind(scene.widthProperty().divide(1));
 
         stage.setScene(scene);
-        stage.setTitle("Hello FXml!");
+        stage.setTitle("TANKS server!");
         stage.show();
 
 
