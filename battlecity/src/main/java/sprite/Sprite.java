@@ -19,6 +19,7 @@ public class Sprite extends Rectangle {
     public InputStream inputStream;
     public OutputStream outputStream;
     String nickName;
+    int killingCount=0;
 
 
 
@@ -28,6 +29,37 @@ public class Sprite extends Rectangle {
 
     public void setDirection(Main.Direction direction){
         this.direction=direction;
+    }
+
+    public int getKillingCount(){
+        return killingCount;
+    }
+
+    public Sprite(int x, int y, int w, int h, String type, Color color, Main.Direction direction,InputStream inputStream,OutputStream outputStream,String nickName,int killingCount) {
+        super(w, h, color);
+        this.inputStream=inputStream;
+        this.outputStream=outputStream;
+        this.nickName=nickName;
+        if (direction != null) {
+            switch (direction) {
+                case LEFT:
+                    this.direction = Main.Direction.LEFT;
+                    break;
+                case RIGHT:
+                    this.direction = Main.Direction.RIGHT;
+                    break;
+                case DOWN:
+                    this.direction = Main.Direction.DOWN;
+                    break;
+                case UP:
+                    this.direction = Main.Direction.UP;
+                    break;
+            }
+        }
+        this.type = type;
+        this.killingCount=killingCount;
+        setTranslateX(x);
+        setTranslateY(y);
     }
 
     public Sprite(int x, int y, int w, int h, String type, Color color, Main.Direction direction,InputStream inputStream,OutputStream outputStream,String nickName) {
@@ -51,10 +83,13 @@ public class Sprite extends Rectangle {
                     break;
             }
         }
+        this.type = type;
+        setTranslateX(x);
+        setTranslateY(y);
+    }
 
-
-
-
+    public Sprite(int x, int y, int w, int h, String type, Color color) {
+        super(w, h, color);
         this.type = type;
         setTranslateX(x);
         setTranslateY(y);
