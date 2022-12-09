@@ -43,6 +43,7 @@ public class FormController implements Initializable {
     List<sprite.Sprite> allObjects;
     public Direction direction = null;
     private Sprite player;
+    private String nickName;
     private Pane root = new Pane();
     private double t = 0;
     boolean firstLaunch=true;
@@ -76,6 +77,33 @@ public class FormController implements Initializable {
         t += 0.016;
 
         if(Main.client.isGameIsFinished()){
+            System.out.println(Main.client.getX());
+            if(Main.client.getX()==-2){
+                try {
+                    Main.client.gameIsFinished=false;
+                    timer.stop();
+                    Parent root = FXMLLoader.load(Objects.requireNonNull(getClass().getResource("/form.fxml")));
+                    Scene scene = new Scene(root);
+                    stage.setScene(scene);
+                    stage.show();
+                    scene.setOnKeyPressed(e->{
+                        switch (e.getCode()){
+                            case ESCAPE:
+                                Main.client.leaveApp=true;
+                                try {
+                                    Main.client.inputStream.close();
+                                    Main.client.outputStream.close();
+                                } catch (IOException ex) {
+                                    throw new RuntimeException(ex);
+                                }
+                                stage.close();
+                        }
+                    });
+                    return;
+                }catch (Exception e){
+                    throw new RuntimeException(e);
+                }
+            }
             try {
                 Main.client.gameIsFinished=false;
                 timer.stop();
@@ -106,7 +134,6 @@ public class FormController implements Initializable {
 
 
 //        System.out.println(allObjects.toString());
-        System.out.println(firstLaunch);
 
         List<Sprite> listOfSpritesFromRoot=new LinkedList<>();
         List<Sprite> listOfLevelBlocks=new LinkedList<>();
@@ -132,7 +159,7 @@ public class FormController implements Initializable {
         }
 
         for(Sprite sprite: allObjects){
-            if(sprite.getNickName()!=null){
+            if(!sprite.getNickName().contains("bullet")){
                 if(!sprite.getNickName().equals(player.getNickName())){
                     switch (sprite.getDirection()){
                         case UP:
@@ -158,6 +185,9 @@ public class FormController implements Initializable {
                     nick.setTranslateX(sprite.getTranslateX());
                     nick.setTranslateY(sprite.getTranslateY()+35);
                     root.getChildren().add(nick);
+                }else{
+                    Main.client.kills= sprite.getKillingCount();
+                    stage.setTitle("TANKS!"+""+Main.client.kills);
                 }
             }else{ // ПУСТОЕ ИМЯ ВОЗМОЖНО ТОЛЬКО У ПУЛЬ
                 root.getChildren().add(sprite);
@@ -194,11 +224,12 @@ public class FormController implements Initializable {
 
         //ОТПРАВЛЯЕМ СЕРВЕРУ НАШ НИК
         packetFromClientToServer = MainPacket.create(1);
-        if(nameTextField!=null){
+        if(Main.client.getPlayerName()==null){
             TextField userName = new TextField(nameTextField.getText());
             packetFromClientToServer.setValue(userName.getText());
+            Main.client.setPlayerName(userName.getText());
         }else{
-            packetFromClientToServer.setValue(player.getNickName());
+            packetFromClientToServer.setValue(Main.client.getPlayerName());
         }
 
         try {
@@ -215,10 +246,22 @@ public class FormController implements Initializable {
             }
         }
 
+        try {
+            Thread.sleep(20);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+
         player = new Sprite(Main.client.getX(), Main.client.getY(), 30, 30, "player", Color.BLUE, null,null,null,null);
-        if(nameTextField!=null){
+        if(Main.client.getPlayerName()==null){
             player.setNickName(nameTextField.getText());
             firstLaunch=false;
+        }else{
+            player.setNickName(Main.client.getPlayerName());
+        }
+        System.out.println(Main.client.getX());
+        if(Main.client.getX()==-2){
+            Main.client.setPlayerName(null);
         }
 
 
@@ -521,6 +564,8 @@ public class FormController implements Initializable {
                     stage.close();
             }
         });
+
+        System.out.println(Main.client.getX());
         stage.setScene(scene);
         stage.setTitle("TANKS!");
         stage.show();
