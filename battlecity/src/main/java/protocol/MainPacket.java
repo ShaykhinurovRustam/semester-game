@@ -27,6 +27,7 @@ public class MainPacket {
     private static final byte Shot = 3;
     private static final byte Exit = 4;
     private static final byte Players = 5;
+    private static final byte BusyName = 6;
 
 
     byte type;
@@ -66,8 +67,6 @@ public class MainPacket {
                 case Shot:
                     ShotHandler.toByteArray(field, writer);
                     break;
-                case Exit:
-//                    ExitHandler.toByteArray(field, writer);
                 case Players:
                     PlayersHandler.toByteArray(PlayersCoordinates, writer);
                     break;
@@ -101,6 +100,8 @@ public class MainPacket {
                 return ExitHandler.parse(data);
             case Players:
                 return PlayersHandler.parse(data);
+            case BusyName:
+                return ExitHandler.parse(data);
         }
         return null;
     }
@@ -118,10 +119,7 @@ public class MainPacket {
                 if (value.getClass().equals(LinkedList.class) || value.getClass().equals(ArrayList.class)) {
                     boolean allIsInteger = true;
                     for (int i = 0; i < ((java.util.AbstractList<?>) value).size(); i++) {
-//                        System.out.println(((AbstractList<?>) value).get(i).equals(Integer.class));
-//                        System.out.println(((AbstractList<?>) value).get(i).getClass());
                         if (((AbstractList<?>) value).get(i).equals(Integer.class)) {
-//                            System.out.println(((AbstractList<?>) value).get(i).equals(Integer.class));
                             allIsInteger = false;
                         }
                     }
@@ -151,22 +149,10 @@ public class MainPacket {
                     throw new RuntimeException("Получен не список");
                 }
                 break;
-//            case Exit:
 
             case Players:
                 if (value.getClass().equals(LinkedList.class) || value.getClass().equals(ArrayList.class)) {
                     boolean allIsInteger = true;
-//                    for (int i = 0; i < ((java.util.AbstractList<?>) value).size(); i++) {
-//                        if (!((AbstractList<?>) value).get(i).equals(LinkedList.class) || ((AbstractList<?>) value).get(i).equals(ArrayList.class)) {
-//                            for (int j = 0; j < ((AbstractList<AbstractList<?>>) value).get(i).size(); j++) {
-//                                if (((AbstractList<AbstractList<?>>) value).get(i).get(j).equals(Integer.class)) {
-//                                    allIsInteger = false;
-//                                }
-//                            }
-//                        } else {
-//                            throw new RuntimeException("Получен не список списков");
-//                        }
-//                    }
                     if (allIsInteger) {
                         PlayersCoordinates=PlayersHandler.setValue((java.util.AbstractList<AbstractList<Object>>) value);
                     } else {
@@ -180,26 +166,8 @@ public class MainPacket {
     }
 
 
-//    public Field getField(int id) {
-//        Optional<Field> field = getFields().stream()
-//                .filter(f -> f.getId() == (byte) id)
-//                .findFirst();
-//        if (field.isEmpty()) {
-//            throw new IllegalArgumentException("No field with that id");
-//        }
-//        return field.get();
-//    }
 
     public <T> T getValue(Class<T> clazz) {
-//        Field field = getField(id);
-//        try (ByteArrayInputStream bis = new ByteArrayInputStream(field.getContent());
-//             ObjectInputStream ois = new ObjectInputStream(bis)) {
-//            return (T) ois.readObject();
-//        } catch (IOException e) {
-//            throw new RuntimeException(e);
-//        } catch (ClassNotFoundException e) {
-//            throw new RuntimeException(e);
-//        }
         switch (type) {
             case Name:
                 return (T) NameHandler.getValue(field, String.class);
@@ -207,7 +175,6 @@ public class MainPacket {
                 return (T) CoordinatesHandler.getValue(field, List.class);
             case Shot:
                 return (T) ShotHandler.getValue(field, List.class);
-//            case Exit:
             case Players:
                 return (T) PlayersHandler.getValue(PlayersCoordinates, List.class);
 
