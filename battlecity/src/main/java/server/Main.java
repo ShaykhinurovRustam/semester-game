@@ -1,8 +1,10 @@
 package server;
 
 import protocol.MainPacket;
+import com.sun.javafx.collections.ImmutableObservableList;
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
+import javafx.collections.ObservableList;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -25,6 +27,8 @@ import java.io.IOException;
 
 
 public class Main extends Application {
+
+    List<Rectangle> rectangles = new LinkedList<>();
 
     public double width=390.0;
     public double height=390.0;
@@ -99,7 +103,6 @@ public class Main extends Application {
 
         List<Sprite> allObjects = server.getAllObjects();
 
-//        System.out.println(allObjects.toString());
 
 
         sprites(allObjects).forEach(s -> {
@@ -119,16 +122,15 @@ public class Main extends Application {
                             s.moveRight();
                             break;
                     }
-                    root.getChildren().stream().map(e -> (Sprite) e).filter(e -> e.type.contains("level")).forEach(levelBlock -> {
+
+                    rectangles.stream().forEach(levelBlock -> {
                         if (s.getBoundsInParent().intersects(levelBlock.getBoundsInParent())) {
-//                            System.out.println("Пуля ударилассь об стену");
                             s.dead = true;
                         }
                     });
 
                     sprites(allObjects).stream().filter(e -> e.type.equals("player")).forEach(player -> {
                         if (s.getBoundsInParent().intersects(player.getBoundsInParent())) {
-//                            System.out.println("Пуля ударилась об игрока");
                             s.dead = true;
                             player.dead = true;
                             String nameOfShot=s.getNickName();
@@ -180,7 +182,7 @@ public class Main extends Application {
                     playerInfo.add((byte)2);
                     break;
             }
-            playerInfo.add(sprite.getKillingCount());
+            playerInfo.add((byte)sprite.getKillingCount());
             players.add(playerInfo);
 
         }
@@ -201,7 +203,6 @@ public class Main extends Application {
 
         }
 
-//        System.out.println(allObjects.toString());
 
 
 
@@ -211,23 +212,11 @@ public class Main extends Application {
         });
 
 
-        List<Sprite> listOfSpritesFromRoot = new LinkedList<>();
-        List<Sprite> listOfLevelBlocks = new LinkedList<>();
-
-        for (Node node : root.getChildren()) {
-            listOfSpritesFromRoot.add((Sprite) node);
-        }
-
-        for (Sprite sprite : listOfSpritesFromRoot) {
-            if (sprite.type.contains("level")) {
-                listOfLevelBlocks.add(sprite);
-            }
-        }
 
 
         root.getChildren().clear();
-        for (Node sprite : listOfLevelBlocks) {
-            root.getChildren().add(sprite);
+        for(Rectangle rectangle: rectangles){
+            root.getChildren().add(rectangle);
         }
 
         for (Sprite sprite : allObjects) {
@@ -245,70 +234,69 @@ public class Main extends Application {
 
 
         Scene scene = new Scene(createContent(), 390, 390, Color.BLACK);
-        List<Rectangle> rectangles = new LinkedList<>();
-        rectangles.add(new Sprite(30, 30, 30, 30, "level1", Color.BLUE));
-        rectangles.add(new Sprite(90, 30, 30, 30, "level1", Color.BLUE));
-        rectangles.add(new Sprite(150, 30, 30, 30, "level1", Color.BLUE));
-        rectangles.add(new Sprite(210, 30, 30, 30, "level1", Color.BLUE));
-        rectangles.add(new Sprite(270, 30, 30, 30, "level1", Color.BLUE));
-        rectangles.add(new Sprite(330, 30, 30, 30, "level1", Color.BLUE));
-        rectangles.add(new Sprite(30, 60, 30, 30, "level1", Color.BLUE));
-        rectangles.add(new Sprite(90, 60, 30, 30, "level1", Color.BLUE));
-        rectangles.add(new Sprite(150, 60, 30, 30, "level1", Color.BLUE));
-        rectangles.add(new Sprite(210, 60, 30, 30, "level1", Color.BLUE));
-        rectangles.add(new Sprite(270, 60, 30, 30, "level1", Color.BLUE));
-        rectangles.add(new Sprite(330, 60, 30, 30, "level1", Color.BLUE));
-        rectangles.add(new Sprite(30, 90, 30, 30, "level1", Color.BLUE));
-        rectangles.add(new Sprite(90, 90, 30, 30, "level1", Color.BLUE));
-        rectangles.add(new Sprite(150, 90, 30, 30, "level1", Color.BLUE));
-        rectangles.add(new Sprite(210, 90, 30, 30, "level1", Color.BLUE));
-        rectangles.add(new Sprite(270, 90, 30, 30, "level1", Color.BLUE));
-        rectangles.add(new Sprite(330, 90, 30, 30, "level1", Color.BLUE));
-        rectangles.add(new Sprite(180, 90, 30, 30, "level1", Color.BLUE));
+        rectangles.add(new Rectangle(30, 30, 30, 30));
+        rectangles.add(new Rectangle(90, 30, 30, 30));
+        rectangles.add(new Rectangle(150, 30, 30, 30));
+        rectangles.add(new Rectangle(210, 30, 30, 30));
+        rectangles.add(new Rectangle(270, 30, 30, 30));
+        rectangles.add(new Rectangle(330, 30, 30, 30));
+        rectangles.add(new Rectangle(30, 60, 30, 30));
+        rectangles.add(new Rectangle(90, 60, 30, 30));
+        rectangles.add(new Rectangle(150, 60, 30, 30));
+        rectangles.add(new Rectangle(210, 60, 30, 30));
+        rectangles.add(new Rectangle(270, 60, 30, 30));
+        rectangles.add(new Rectangle(330, 60, 30, 30));
+        rectangles.add(new Rectangle(30, 90, 30, 30));
+        rectangles.add(new Rectangle(90, 90, 30, 30));
+        rectangles.add(new Rectangle(150, 90, 30, 30));
+        rectangles.add(new Rectangle(210, 90, 30, 30));
+        rectangles.add(new Rectangle(270, 90, 30, 30));
+        rectangles.add(new Rectangle(330, 90, 30, 30));
+        rectangles.add(new Rectangle(180, 90, 30, 30));
 
-        rectangles.add(new Sprite(30, 120, 30, 30, "level1", Color.BLUE));
-        rectangles.add(new Sprite(90, 120, 30, 30, "level1", Color.BLUE));
-        rectangles.add(new Sprite(270, 120, 30, 30, "level1", Color.BLUE));
-        rectangles.add(new Sprite(330, 120, 30, 30, "level1", Color.BLUE));
+        rectangles.add(new Rectangle(30, 120, 30, 30));
+        rectangles.add(new Rectangle(90, 120, 30, 30));
+        rectangles.add(new Rectangle(270, 120, 30, 30));
+        rectangles.add(new Rectangle(330, 120, 30, 30));
 
-        rectangles.add(new Sprite(150, 150, 30, 30, "level1", Color.BLUE));
-        rectangles.add(new Sprite(210, 150, 30, 30, "level1", Color.BLUE));
+        rectangles.add(new Rectangle(150, 150, 30, 30));
+        rectangles.add(new Rectangle(210, 150, 30, 30));
 
-        rectangles.add(new Sprite(0, 180, 30, 30, "level1", Color.BLUE));
-        rectangles.add(new Sprite(60, 180, 30, 30, "level1", Color.BLUE));
-        rectangles.add(new Sprite(90, 180, 30, 30, "level1", Color.BLUE));
-        rectangles.add(new Sprite(270, 180, 30, 30, "level1", Color.BLUE));
-        rectangles.add(new Sprite(300, 180, 30, 30, "level1", Color.BLUE));
-        rectangles.add(new Sprite(360, 180, 30, 30, "level1", Color.BLUE));
+        rectangles.add(new Rectangle(0, 180, 30, 30));
+        rectangles.add(new Rectangle(60, 180, 30, 30));
+        rectangles.add(new Rectangle(90, 180, 30, 30));
+        rectangles.add(new Rectangle(270, 180, 30, 30));
+        rectangles.add(new Rectangle(300, 180, 30, 30));
+        rectangles.add(new Rectangle(360, 180, 30, 30));
 
-        rectangles.add(new Sprite(150, 210, 30, 30, "level1", Color.BLUE));
-        rectangles.add(new Sprite(180, 210, 30, 30, "level1", Color.BLUE));
-        rectangles.add(new Sprite(210, 210, 30, 30, "level1", Color.BLUE));
+        rectangles.add(new Rectangle(150, 210, 30, 30));
+        rectangles.add(new Rectangle(180, 210, 30, 30));
+        rectangles.add(new Rectangle(210, 210, 30, 30));
 
-        rectangles.add(new Sprite(150, 240, 30, 30, "level1", Color.BLUE));
-        rectangles.add(new Sprite(210, 240, 30, 30, "level1", Color.BLUE));
+        rectangles.add(new Rectangle(150, 240, 30, 30));
+        rectangles.add(new Rectangle(210, 240, 30, 30));
 
-        rectangles.add(new Sprite(30, 270, 30, 30, "level1", Color.BLUE));
-        rectangles.add(new Sprite(90, 270, 30, 30, "level1", Color.BLUE));
-        rectangles.add(new Sprite(150, 270, 30, 30, "level1", Color.BLUE));
-        rectangles.add(new Sprite(210, 270, 30, 30, "level1", Color.BLUE));
-        rectangles.add(new Sprite(270, 270, 30, 30, "level1", Color.BLUE));
-        rectangles.add(new Sprite(330, 270, 30, 30, "level1", Color.BLUE));
+        rectangles.add(new Rectangle(30, 270, 30, 30));
+        rectangles.add(new Rectangle(90, 270, 30, 30));
+        rectangles.add(new Rectangle(150, 270, 30, 30));
+        rectangles.add(new Rectangle(210, 270, 30, 30));
+        rectangles.add(new Rectangle(270, 270, 30, 30));
+        rectangles.add(new Rectangle(330, 270, 30, 30));
 
-        rectangles.add(new Sprite(30, 300, 30, 30, "level1", Color.BLUE));
-        rectangles.add(new Sprite(90, 300, 30, 30, "level1", Color.BLUE));
-        rectangles.add(new Sprite(270, 300, 30, 30, "level1", Color.BLUE));
-        rectangles.add(new Sprite(330, 300, 30, 30, "level1", Color.BLUE));
+        rectangles.add(new Rectangle(30, 300, 30, 30));
+        rectangles.add(new Rectangle(90, 300, 30, 30));
+        rectangles.add(new Rectangle(270, 300, 30, 30));
+        rectangles.add(new Rectangle(330, 300, 30, 30));
 
-        rectangles.add(new Sprite(30, 330, 30, 30, "level1", Color.BLUE));
-        rectangles.add(new Sprite(90, 330, 30, 30, "level1", Color.BLUE));
-        rectangles.add(new Sprite(150, 330, 30, 30, "level1", Color.BLUE));
-        rectangles.add(new Sprite(210, 330, 30, 30, "level1", Color.BLUE));
-        rectangles.add(new Sprite(270, 330, 30, 30, "level1", Color.BLUE));
-        rectangles.add(new Sprite(330, 330, 30, 30, "level1", Color.BLUE));
+        rectangles.add(new Rectangle(30, 330, 30, 30));
+        rectangles.add(new Rectangle(90, 330, 30, 30));
+        rectangles.add(new Rectangle(150, 330, 30, 30));
+        rectangles.add(new Rectangle(210, 330, 30, 30));
+        rectangles.add(new Rectangle(270, 330, 30, 30));
+        rectangles.add(new Rectangle(330, 330, 30, 30));
 
-        rectangles.add(new Sprite(210, 360, 30, 30, "level1", Color.BLUE));
-        rectangles.add(new Sprite(150, 360, 30, 30, "level1", Color.BLUE));
+        rectangles.add(new Rectangle(210, 360, 30, 30));
+        rectangles.add(new Rectangle(150, 360, 30, 30));
 
 
         Image img = new Image("/images/block.png");

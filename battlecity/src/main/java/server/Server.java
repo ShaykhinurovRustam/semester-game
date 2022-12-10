@@ -12,7 +12,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import javafx.scene.paint.Color;
-import server.Direction;
+import server.Main.Direction;
 import sprite.Sprite;
 
 @NoArgsConstructor
@@ -103,7 +103,7 @@ public class Server extends Thread {
                                         break;
 
                                 }
-                                allObjects.add(new Sprite(XYShot.get(0), XYShot.get(1), 3, 3, "bullet", Color.WHITE, direction, null, null, null));
+                                allObjects.add(new Sprite(XYShot.get(0), XYShot.get(1), 3, 3, "bullet", Color.WHITE, direction, null, null, name+"bullet"));
                                 break;
                             case 4:
                                 leaveGame = true;
@@ -147,18 +147,17 @@ public class Server extends Thread {
                 if (packetFromUser.getType() == 1) {
                     if(name==null){
                         name = packetFromUser.getValue(String.class);
-                        System.out.println(allNickNames.toString());
                         for(String nick: allNickNames){
                             if(nick.equals(name)){
                                 name=null;
                                 LinkedList<Integer> XAndY = new LinkedList<>();
-                                XAndY.add(-2);
-                                XAndY.add(-2);
+                                XAndY.add(0);// СОМНИТЕЛЬНАЯ ХРЕНЬ???
+                                XAndY.add(0);
                                 MainPacket startCoordinate=MainPacket.create(2);
                                 startCoordinate.setValue(XAndY);
                                 outputStream.write(startCoordinate.toByteArray());
                                 outputStream.flush();
-                                outputStream.write(MainPacket.create(4).toByteArray());
+                                outputStream.write(MainPacket.create(6).toByteArray());
                                 outputStream.flush();
                                 dataFromUser = readInput(inputStream);
                                 packetFromUser = MainPacket.parse(dataFromUser);
@@ -168,9 +167,7 @@ public class Server extends Thread {
                         }
                         allNickNames.add(name);
                     }
-                    System.out.println(allNickNames.toString());
                     while (true) {
-                        System.out.println("Определяем позицию");
                         boolean occupied = false;
                         for (Sprite sprite : allObjects) {
                             if (sprite.getTranslateX() < 90 && sprite.getTranslateY() < 90) {
@@ -241,7 +238,6 @@ public class Server extends Thread {
                         }
                     }
                 } else {
-                    System.out.println(packetFromUser.getType());
                     this.run();
                 }
 
