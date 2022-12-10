@@ -23,7 +23,6 @@ import lombok.Data;
 import sprite.Sprite;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
 import java.util.LinkedList;
@@ -38,6 +37,9 @@ public class FormController implements Initializable {
 
     OutputStream outputStream = Main.client.getOutputStream();
 
+
+    List<Rectangle> rectangles = new LinkedList<>();
+
     MainPacket packetFromClientToServer;
 
     List<sprite.Sprite> allObjects;
@@ -46,7 +48,6 @@ public class FormController implements Initializable {
     private String nickName;
     private Pane root = new Pane();
     private double t = 0;
-    boolean firstLaunch=true;
     @FXML
     TextField nameTextField;
     AnimationTimer timer;
@@ -77,10 +78,10 @@ public class FormController implements Initializable {
         t += 0.016;
 
         if(Main.client.isGameIsFinished()){
-            System.out.println(Main.client.getX());
-            if(Main.client.getX()==-2){
+            if(Main.client.nameIsBusy){
                 try {
                     Main.client.gameIsFinished=false;
+                    Main.client.nameIsBusy=false;
                     timer.stop();
                     Parent root = FXMLLoader.load(Objects.requireNonNull(getClass().getResource("/form.fxml")));
                     Scene scene = new Scene(root);
@@ -106,6 +107,7 @@ public class FormController implements Initializable {
             }
             try {
                 Main.client.gameIsFinished=false;
+
                 timer.stop();
                 Parent root = FXMLLoader.load(Objects.requireNonNull(getClass().getResource("/formForRespawn.fxml")));
                 Scene scene = new Scene(root);
@@ -131,31 +133,20 @@ public class FormController implements Initializable {
         }
 
         allObjects=Main.client.getOtherPlayerAndBullets();
+        System.out.println(allObjects.toString());
 
 
-//        System.out.println(allObjects.toString());
 
-        List<Sprite> listOfSpritesFromRoot=new LinkedList<>();
-        List<Sprite> listOfLevelBlocks=new LinkedList<>();
 
-        for(Node node:root.getChildren()){
-            if(!node.getClass().equals(Text.class)){
-                listOfSpritesFromRoot.add((Sprite) node);
-            }
-        }
-
-        for(Sprite sprite: listOfSpritesFromRoot){
-            if(sprite.type.contains("level")){
-                listOfLevelBlocks.add(sprite);
-            }
-        }
 
         root.getChildren().clear();
 
         root.getChildren().add(player);
 
-        for(Node sprite: listOfLevelBlocks){
-            root.getChildren().add(sprite);
+
+
+        for(Rectangle rectangle: rectangles){
+            root.getChildren().add(rectangle);
         }
 
         for(Sprite sprite: allObjects){
@@ -189,7 +180,7 @@ public class FormController implements Initializable {
                     Main.client.kills= sprite.getKillingCount();
                     stage.setTitle("TANKS!"+""+Main.client.kills);
                 }
-            }else{ // ПУСТОЕ ИМЯ ВОЗМОЖНО ТОЛЬКО У ПУЛЬ
+            }else{
                 root.getChildren().add(sprite);
             }
         }
@@ -214,6 +205,7 @@ public class FormController implements Initializable {
 
 
     public void login(ActionEvent event) throws IOException {
+        rectangles=new LinkedList<>();
 
 
 
@@ -224,13 +216,15 @@ public class FormController implements Initializable {
 
         //ОТПРАВЛЯЕМ СЕРВЕРУ НАШ НИК
         packetFromClientToServer = MainPacket.create(1);
+        TextField userName = null;
         if(Main.client.getPlayerName()==null){
-            TextField userName = new TextField(nameTextField.getText());
+            userName = new TextField(nameTextField.getText());
             packetFromClientToServer.setValue(userName.getText());
-            Main.client.setPlayerName(userName.getText());
         }else{
             packetFromClientToServer.setValue(Main.client.getPlayerName());
         }
+
+        System.out.println(packetFromClientToServer.getValue(String.class));
 
         try {
             outputStream.write(packetFromClientToServer.toByteArray());
@@ -255,81 +249,79 @@ public class FormController implements Initializable {
         player = new Sprite(Main.client.getX(), Main.client.getY(), 30, 30, "player", Color.BLUE, null,null,null,null);
         if(Main.client.getPlayerName()==null){
             player.setNickName(nameTextField.getText());
-            firstLaunch=false;
+            Main.client.setPlayerName(userName.getText());
         }else{
             player.setNickName(Main.client.getPlayerName());
         }
-        System.out.println(Main.client.getX());
-        if(Main.client.getX()==-2){
+        if(Main.client.nameIsBusy){
             Main.client.setPlayerName(null);
         }
 
 
         Scene scene = new Scene(createContent(), 390, 390, Color.BLACK);
-        List<Rectangle> rectangles = new LinkedList<>();
-        rectangles.add(new Sprite(30, 30, 30, 30, "level1", Color.BLUE));
-        rectangles.add(new Sprite(90, 30, 30, 30, "level1", Color.BLUE));
-        rectangles.add(new Sprite(150, 30, 30, 30, "level1", Color.BLUE));
-        rectangles.add(new Sprite(210, 30, 30, 30, "level1", Color.BLUE));
-        rectangles.add(new Sprite(270, 30, 30, 30, "level1", Color.BLUE));
-        rectangles.add(new Sprite(330, 30, 30, 30, "level1", Color.BLUE));
-        rectangles.add(new Sprite(30, 60, 30, 30, "level1", Color.BLUE));
-        rectangles.add(new Sprite(90, 60, 30, 30, "level1", Color.BLUE));
-        rectangles.add(new Sprite(150, 60, 30, 30, "level1", Color.BLUE));
-        rectangles.add(new Sprite(210, 60, 30, 30, "level1", Color.BLUE));
-        rectangles.add(new Sprite(270, 60, 30, 30, "level1", Color.BLUE));
-        rectangles.add(new Sprite(330, 60, 30, 30, "level1", Color.BLUE));
-        rectangles.add(new Sprite(30, 90, 30, 30, "level1", Color.BLUE));
-        rectangles.add(new Sprite(90, 90, 30, 30, "level1", Color.BLUE));
-        rectangles.add(new Sprite(150, 90, 30, 30, "level1", Color.BLUE));
-        rectangles.add(new Sprite(210, 90, 30, 30, "level1", Color.BLUE));
-        rectangles.add(new Sprite(270, 90, 30, 30, "level1", Color.BLUE));
-        rectangles.add(new Sprite(330, 90, 30, 30, "level1", Color.BLUE));
-        rectangles.add(new Sprite(180, 90, 30, 30, "level1", Color.BLUE));
+        rectangles.add(new Rectangle(30, 30, 30, 30));
+        rectangles.add(new Rectangle(90, 30, 30, 30));
+        rectangles.add(new Rectangle(150, 30, 30, 30));
+        rectangles.add(new Rectangle(210, 30, 30, 30));
+        rectangles.add(new Rectangle(270, 30, 30, 30));
+        rectangles.add(new Rectangle(330, 30, 30, 30));
+        rectangles.add(new Rectangle(30, 60, 30, 30));
+        rectangles.add(new Rectangle(90, 60, 30, 30));
+        rectangles.add(new Rectangle(150, 60, 30, 30));
+        rectangles.add(new Rectangle(210, 60, 30, 30));
+        rectangles.add(new Rectangle(270, 60, 30, 30));
+        rectangles.add(new Rectangle(330, 60, 30, 30));
+        rectangles.add(new Rectangle(30, 90, 30, 30));
+        rectangles.add(new Rectangle(90, 90, 30, 30));
+        rectangles.add(new Rectangle(150, 90, 30, 30));
+        rectangles.add(new Rectangle(210, 90, 30, 30));
+        rectangles.add(new Rectangle(270, 90, 30, 30));
+        rectangles.add(new Rectangle(330, 90, 30, 30));
+        rectangles.add(new Rectangle(180, 90, 30, 30));
 
-        rectangles.add(new Sprite(30, 120, 30, 30, "level1", Color.BLUE));
-        rectangles.add(new Sprite(90, 120, 30, 30, "level1", Color.BLUE));
-        rectangles.add(new Sprite(270, 120, 30, 30, "level1", Color.BLUE));
-        rectangles.add(new Sprite(330, 120, 30, 30, "level1", Color.BLUE));
+        rectangles.add(new Rectangle(30, 120, 30, 30));
+        rectangles.add(new Rectangle(90, 120, 30, 30));
+        rectangles.add(new Rectangle(270, 120, 30, 30));
+        rectangles.add(new Rectangle(330, 120, 30, 30));
 
-        rectangles.add(new Sprite(150, 150, 30, 30, "level1", Color.BLUE));
-        rectangles.add(new Sprite(210, 150, 30, 30, "level1", Color.BLUE));
+        rectangles.add(new Rectangle(150, 150, 30, 30));
+        rectangles.add(new Rectangle(210, 150, 30, 30));
 
-        rectangles.add(new Sprite(0, 180, 30, 30, "level1", Color.BLUE));
-        rectangles.add(new Sprite(60, 180, 30, 30, "level1", Color.BLUE));
-        rectangles.add(new Sprite(90, 180, 30, 30, "level1", Color.BLUE));
-        rectangles.add(new Sprite(270, 180, 30, 30, "level1", Color.BLUE));
-        rectangles.add(new Sprite(300, 180, 30, 30, "level1", Color.BLUE));
-        rectangles.add(new Sprite(360, 180, 30, 30, "level1", Color.BLUE));
+        rectangles.add(new Rectangle(0, 180, 30, 30));
+        rectangles.add(new Rectangle(60, 180, 30, 30));
+        rectangles.add(new Rectangle(90, 180, 30, 30));
+        rectangles.add(new Rectangle(270, 180, 30, 30));
+        rectangles.add(new Rectangle(300, 180, 30, 30));
+        rectangles.add(new Rectangle(360, 180, 30, 30));
 
-        rectangles.add(new Sprite(150, 210, 30, 30, "level1", Color.BLUE));
-        rectangles.add(new Sprite(180, 210, 30, 30, "level1", Color.BLUE));
-        rectangles.add(new Sprite(210, 210, 30, 30, "level1", Color.BLUE));
+        rectangles.add(new Rectangle(150, 210, 30, 30));
+        rectangles.add(new Rectangle(180, 210, 30, 30));
+        rectangles.add(new Rectangle(210, 210, 30, 30));
 
-        rectangles.add(new Sprite(150, 240, 30, 30, "level1", Color.BLUE));
-        rectangles.add(new Sprite(210, 240, 30, 30, "level1", Color.BLUE));
+        rectangles.add(new Rectangle(150, 240, 30, 30));
+        rectangles.add(new Rectangle(210, 240, 30, 30));
 
-        rectangles.add(new Sprite(30, 270, 30, 30, "level1", Color.BLUE));
-        rectangles.add(new Sprite(90, 270, 30, 30, "level1", Color.BLUE));
-        rectangles.add(new Sprite(150, 270, 30, 30, "level1", Color.BLUE));
-        rectangles.add(new Sprite(210, 270, 30, 30, "level1", Color.BLUE));
-        rectangles.add(new Sprite(270, 270, 30, 30, "level1", Color.BLUE));
-        rectangles.add(new Sprite(330, 270, 30, 30, "level1", Color.BLUE));
+        rectangles.add(new Rectangle(30, 270, 30, 30));
+        rectangles.add(new Rectangle(90, 270, 30, 30));
+        rectangles.add(new Rectangle(150, 270, 30, 30));
+        rectangles.add(new Rectangle(210, 270, 30, 30));
+        rectangles.add(new Rectangle(270, 270, 30, 30));
+        rectangles.add(new Rectangle(330, 270, 30, 30));
 
-        rectangles.add(new Sprite(30, 300, 30, 30, "level1", Color.BLUE));
-        rectangles.add(new Sprite(90, 300, 30, 30, "level1", Color.BLUE));
-        rectangles.add(new Sprite(270, 300, 30, 30, "level1", Color.BLUE));
-        rectangles.add(new Sprite(330, 300, 30, 30, "level1", Color.BLUE));
+        rectangles.add(new Rectangle(30, 300, 30, 30));
+        rectangles.add(new Rectangle(90, 300, 30, 30));
+        rectangles.add(new Rectangle(270, 300, 30, 30));
+        rectangles.add(new Rectangle(330, 300, 30, 30));
 
-        rectangles.add(new Sprite(30, 330, 30, 30, "level1", Color.BLUE));
-        rectangles.add(new Sprite(90, 330, 30, 30, "level1", Color.BLUE));
-        rectangles.add(new Sprite(150, 330, 30, 30, "level1", Color.BLUE));
-        rectangles.add(new Sprite(210, 330, 30, 30, "level1", Color.BLUE));
-        rectangles.add(new Sprite(270, 330, 30, 30, "level1", Color.BLUE));
-        rectangles.add(new Sprite(330, 330, 30, 30, "level1", Color.BLUE));
+        rectangles.add(new Rectangle(30, 330, 30, 30));
+        rectangles.add(new Rectangle(90, 330, 30, 30));
+        rectangles.add(new Rectangle(150, 330, 30, 30));
+        rectangles.add(new Rectangle(210, 330, 30, 30));
+        rectangles.add(new Rectangle(270, 330, 30, 30));
+        rectangles.add(new Rectangle(330, 330, 30, 30));
 
-        rectangles.add(new Sprite(210, 360, 30, 30, "level1", Color.BLUE));
-        rectangles.add(new Sprite(150, 360, 30, 30, "level1", Color.BLUE));
+        rectangles.add(new Rectangle(210, 360, 30, 30));
+        rectangles.add(new Rectangle(150, 360, 30, 30));
 
 
 
@@ -355,10 +347,10 @@ public class FormController implements Initializable {
                     player.setFill(new ImagePattern(dynamicImage));
                     player.moveLeft();
                     for (Rectangle rectangle : rectangles) {
-                        if (player.getTranslateX() < rectangle.getTranslateX() + rectangle.getWidth() &&
-                                player.getTranslateX() + player.getWidth() > rectangle.getTranslateX() &&
-                                player.getTranslateY() < rectangle.getTranslateY() + rectangle.getHeight() &&
-                                player.getTranslateY() + player.getHeight() > rectangle.getTranslateY()) {
+                        if (player.getTranslateX() < rectangle.getX() + rectangle.getWidth() &&
+                                player.getTranslateX() + player.getWidth() > rectangle.getX() &&
+                                player.getTranslateY() < rectangle.getY() + rectangle.getHeight() &&
+                                player.getTranslateY() + player.getHeight() > rectangle.getY()) {
                             collision.set(true);
                         }
                     }
@@ -393,10 +385,10 @@ public class FormController implements Initializable {
                     player.setFill(new ImagePattern(dynamicImage));
                     player.moveRight();
                     for (Rectangle rectangle : rectangles) {
-                        if (player.getTranslateX() + player.getWidth() > rectangle.getTranslateX() &&
-                                player.getTranslateX() < rectangle.getTranslateX() + rectangle.getWidth() &&
-                                (player.getTranslateY() < rectangle.getTranslateY() + rectangle.getHeight() &&
-                                        player.getTranslateY() + player.getHeight() > rectangle.getTranslateY())) {
+                        if (player.getTranslateX() + player.getWidth() > rectangle.getX() &&
+                                player.getTranslateX() < rectangle.getX() + rectangle.getWidth() &&
+                                (player.getTranslateY() < rectangle.getY() + rectangle.getHeight() &&
+                                        player.getTranslateY() + player.getHeight() > rectangle.getY())) {
                             collision.set(true);
                         }
                     }
@@ -429,10 +421,10 @@ public class FormController implements Initializable {
                     player.setFill(new ImagePattern(dynamicImage));
                     player.moveUp();
                     for (Rectangle rectangle : rectangles) {
-                        if (player.getTranslateY() < rectangle.getTranslateY() + rectangle.getHeight() &&
-                                player.getTranslateY() + player.getHeight() > rectangle.getTranslateY() &&
-                                player.getTranslateX() < rectangle.getTranslateX() + rectangle.getWidth() &&
-                                player.getTranslateX() + player.getWidth() > rectangle.getTranslateX()) {
+                        if (player.getTranslateY() < rectangle.getY() + rectangle.getHeight() &&
+                                player.getTranslateY() + player.getHeight() > rectangle.getY() &&
+                                player.getTranslateX() < rectangle.getX() + rectangle.getWidth() &&
+                                player.getTranslateX() + player.getWidth() > rectangle.getX()) {
                             collision.set(true);
                         }
                     }
@@ -466,10 +458,10 @@ public class FormController implements Initializable {
                     player.setFill(new ImagePattern(dynamicImage));
                     player.moveDown();
                     for (Rectangle rectangle : rectangles) {
-                        if (player.getTranslateY() + player.getHeight() > rectangle.getTranslateY() &&
-                                player.getTranslateY() < rectangle.getTranslateY() + rectangle.getHeight() &&
-                                (player.getTranslateX() < rectangle.getTranslateX() + rectangle.getWidth() &&
-                                        player.getTranslateX() + player.getWidth() > rectangle.getTranslateX())) {
+                        if (player.getTranslateY() + player.getHeight() > rectangle.getY() &&
+                                player.getTranslateY() < rectangle.getY() + rectangle.getHeight() &&
+                                (player.getTranslateX() < rectangle.getX() + rectangle.getWidth() &&
+                                        player.getTranslateX() + player.getWidth() > rectangle.getX())) {
                             collision.set(true);
                         }
                     }
@@ -565,34 +557,9 @@ public class FormController implements Initializable {
             }
         });
 
-        System.out.println(Main.client.getX());
         stage.setScene(scene);
         stage.setTitle("TANKS!");
         stage.show();
     }
 
-    private byte[] extendArray(byte[] oldArray) {
-        int oldSize = oldArray.length;
-        byte[] newArray = new byte[oldSize * 2];
-        System.arraycopy(oldArray, 0, newArray, 0, oldSize);
-        return newArray;
-    }
-
-    byte[] readInput(InputStream stream) throws IOException {
-        int b;
-        byte[] buffer = new byte[10];
-        int counter = 0;
-        while ((b = stream.read()) > -1) {
-            buffer[counter++] = (byte) b;
-            if (counter >= buffer.length) {
-                buffer = extendArray(buffer);
-            }
-            if (counter > 2 && MainPacket.compareEOP(buffer, counter - 1)) {
-                break;
-            }
-        }
-        byte[] data = new byte[counter];
-        System.arraycopy(buffer, 0, data, 0, counter);
-        return data;
-    }
 }

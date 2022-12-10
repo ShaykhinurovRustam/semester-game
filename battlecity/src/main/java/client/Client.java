@@ -35,8 +35,11 @@ public class Client extends Thread{
 
     String name;
 
+    public int kills=0;
+
     public boolean gameIsFinished=false;
     public boolean leaveApp=false;
+    public boolean nameIsBusy=false;
 
     List<Sprite> otherPlayerAndBullets=new LinkedList<>();
 
@@ -58,6 +61,13 @@ public class Client extends Thread{
     }
     public int getY(){
         return y;
+    }
+
+    public void setPlayerName(String name){
+        this.name=name;
+    }
+    public String getPlayerName(){
+        return name;
     }
 
 
@@ -101,23 +111,36 @@ public class Client extends Thread{
 
     public void run(){
         try {
-            x=-1;
             y=-1;
+            x=-1;
             int type=5;
             MainPacket startCoordinate = null;
-            while (type==5 || type==4){
+            while (type==5 || type==4 || type==6){
                 byte[] StartCoordinateData=readInput(inputStream);
                 startCoordinate= MainPacket.parse(StartCoordinateData);
                 type=(int)startCoordinate.getType();
             }
             LinkedList<Integer> startXandY=startCoordinate.getValue(LinkedList.class);
+//            System.out.println(startXandY.toString());
             x=startXandY.get(0);
             y=startXandY.get(1);
             while(true){
                 byte[] ServerData=readInput(inputStream);
                 MainPacket packet= MainPacket.parse(ServerData);
+                if(packet.getType()==6){
+                    gameIsFinished=true;
+                    nameIsBusy=true;
+                    MainPacket packetFromClientToServer = MainPacket.create(4);
+                    try {
+                        outputStream.write(packetFromClientToServer.toByteArray());
+                        outputStream.flush();
+                    } catch (IOException ex) {
+                        throw new RuntimeException(ex);
+                    }
+                    this.run();
+                    break;
+                }
                 if(packet.getType()==4 || gameIsFinished){
-                    x=0;
                     gameIsFinished=true;
                     MainPacket packetFromClientToServer = MainPacket.create(4);
                     try {
@@ -129,6 +152,7 @@ public class Client extends Thread{
                     this.run();
                     break;
                 }
+                nameIsBusy=false;
                 players=packet.getValue(List.class);
                 List<Sprite> otherObjects=new LinkedList<>();
                 for(List<Object> player: players){
@@ -151,14 +175,13 @@ public class Client extends Thread{
                             direction= Main.Direction.LEFT;
                             break;
                     }
-                    if(player.get(2)==null){
+                    if(String.valueOf(player.get(2)).contains("bullet")){
                         otherObjects.add(new Sprite( XCoordinateInt,YCoordinateInt,3,3,"bullet", Color.WHITE,null,null,null,(String)player.get(2)));
                     }else{
-                        otherObjects.add(new Sprite( XCoordinateInt,YCoordinateInt,30,30,"otherPlayer", Color.RED,direction,null,null,(String)player.get(2)));
+                        otherObjects.add(new Sprite( XCoordinateInt,YCoordinateInt,30,30,"otherPlayer", Color.RED,direction,null,null,(String)player.get(2),Integer.parseInt((player.get(4).toString()))));
                     }
                 }
                 otherPlayerAndBullets=otherObjects;
-
 
             }
         } catch (IOException e) {
