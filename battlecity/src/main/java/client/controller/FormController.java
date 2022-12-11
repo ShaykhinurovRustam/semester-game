@@ -137,13 +137,28 @@ public class FormController implements Initializable {
 
 
 
-
+//        List<Sprite> listOfSpritesFromRoot=new LinkedList<>();
+//        List<Sprite> listOfLevelBlocks=new LinkedList<>();
+//
+//        for(Node node:root.getChildren()){
+//            if(!node.getClass().equals(Text.class)){
+//                listOfSpritesFromRoot.add((Sprite) node);
+//            }
+//        }
+//
+//        for(Sprite sprite: listOfSpritesFromRoot){
+//            if(sprite.type.contains("level")){
+//                listOfLevelBlocks.add(sprite);
+//            }
+//        }
 
         root.getChildren().clear();
 
         root.getChildren().add(player);
 
-
+//        for(Node sprite: listOfLevelBlocks){
+//            root.getChildren().add(sprite);
+//        }
 
         for(Rectangle rectangle: rectangles){
             root.getChildren().add(rectangle);
